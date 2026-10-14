@@ -1,118 +1,248 @@
-# SentinelAI — AI-Powered SOC Copilot
+# 🛡️ SentinelAI — AI-Powered SOC Copilot
 
-*Intelligent security log analysis, anomaly detection and incident investigation.*
+**Intelligent Security Monitoring • Anomaly Detection • Incident Analysis**
 
-SentinelAI ingests security logs, normalizes them, detects suspicious activity with **explainable rules** and an **Isolation Forest**, prioritizes alerts, maps findings to **MITRE ATT&CK** (as hypotheses), and generates evidence-based incident reports. It runs fully locally: no paid API, no cloud, and an optional local LLM (Ollama) with a deterministic fallback that works with no model at all.
+SentinelAI is an AI-assisted Security Operations Center (SOC) platform that helps security analysts detect suspicious activity, prioritize alerts, and investigate potential security incidents using machine learning and rule-based detection.
 
-> **Status honesty.** See [Verification status](#verification-status) for exactly what was and was not executed when this project was generated. No screenshots, benchmarks or accuracy figures are claimed.
+It combines a modern React dashboard, a FastAPI backend, PostgreSQL storage, and optional AI-assisted analysis to create a practical cybersecurity monitoring solution.
 
-## Problem statement
-Analysts drown in raw logs. SentinelAI shows how a small SOC tool can turn logs into prioritized, evidence-backed leads with clear limitations, while staying defensible in an interview: every alert states why it fired, what evidence supports it, and what it cannot prove.
+## ✨ Key Features
 
-## Key features
-CSV/JSON/JSONL ingestion with alias mapping, validation, limits and duplicate handling · 8 configurable detection rules incl. correlation · Isolation Forest with reproducible seed and per-alert feature explanations · alert filtering/search/sort/status workflow · incident workspace with timeline, notes, MITRE table · AI-assisted analysis (fallback or local Ollama) with fact/hypothesis separation and anti-hallucination checks · Markdown/JSON reports · dashboard computed from the database · 9 UI views.
+- **🔍 Anomaly Detection:** Identify unusual activity using an Isolation Forest machine learning model.
+- **⚡ Rule-Based Detection:** Flag suspicious events using configurable detection rules.
+- **📂 Security Log Ingestion:** Upload supported log files for analysis.
+- **🚨 Alert Prioritization:** Organize detected events by severity and investigation priority.
+- **🎯 MITRE ATT&CK Mapping:** Associate supported detection patterns with relevant MITRE ATT&CK tactics and techniques.
+- **🤖 AI-Assisted Analysis:** Optional local LLM or API-based analysis for security insights.
+- **📋 Incident Reporting:** Generate structured incident reports to support investigation and documentation.
+- **🧪 Sample Security Logs:** Use sample data to explore detection workflows locally.
+- **🔐 Local-First Setup:** Run the application locally without requiring a paid AI service for its core fallback functionality.
 
-## Technology stack
-React 18 + Vite + Recharts (JavaScript) · Python, FastAPI, Pydantic v2, SQLAlchemy 2 · PostgreSQL (psycopg 3) · scikit-learn, pandas, NumPy · pytest · Vitest + React Testing Library.
+## 🧰 Tech Stack
 
-## Architecture
-See [docs/architecture.md](docs/architecture.md) (Mermaid diagram). Data flow: *upload → parse/normalize → store (deduplicated) → detection run (rules → correlation → ML) → alerts with evidence links → incident → analysis (fallback/Ollama) → report*.
+| Component | Technologies |
+|---|---|
+| Frontend | React, Vite, JavaScript |
+| Backend | Python, FastAPI |
+| Machine Learning | Scikit-learn, Isolation Forest |
+| Detection | Rule-Based Detection Engine |
+| Database | PostgreSQL |
+| ORM | SQLAlchemy |
+| AI Analysis | Local LLM / Optional API |
+| API Documentation | FastAPI / OpenAPI |
+| Development | Git, GitHub, VS Code |
 
-## Detection pipeline: rules vs ML
-Rules are deterministic, threshold-driven and explain themselves; they catch known patterns but miss anything below thresholds. The Isolation Forest is unsupervised: it ranks events that are statistically unusual *within the uploaded data*, can surface the unknown, but also flags rare-but-benign activity. ML alerts are labelled separately, never exceed Medium severity, carry no MITRE mapping, and are skipped (with a reason) when there are too few events. Details: [docs/detection-rules.md](docs/detection-rules.md).
+## 🏗️ System Architecture
 
-## AI provider and fallback
-`AI_PROVIDER=fallback` (default) uses deterministic templates grounded in stored alerts. `ollama` (or choosing it in the UI) calls a **local** model; if unreachable, slow or returning invalid output, the API returns the deterministic analysis and says so (`fallback_reason`). Model output is validated: unknown alert/event references are removed, IPs not in the evidence are flagged, MITRE data always comes from the mapping file, and logs are passed as untrusted data. Analysis is always labelled advisory.
-
-## Database schema overview
-`ingestion_batches` → `security_events` (unique fingerprint, indexed timestamp/IP/user/type) · `alerts` (unique fingerprint; severity/status CHECK constraints; JSON evidence metadata) · `alert_events` (many-to-many evidence) · `incidents` + `incident_alerts` + `incident_notes` · `reports` · `detection_runs` · `detection_config`. Tables are created by `python -m scripts.init_db` (SQLAlchemy `create_all`). Alembic migrations are **not included** in v1.
-
-## MITRE ATT&CK approach
-Small, well-supported set in `backend/app/mitre/mappings.json` with rationale and relation (`behavior_consistent` / `potential_association`). Some detections deliberately have no mapping. References: https://attack.mitre.org/
-
-## Prerequisites
-Python 3.11–3.12, Node.js 18+ (20+ recommended), PostgreSQL 14+. Optional: [Ollama](https://ollama.com) for local LLM analysis.
-
-## Installation
-
-### 1. PostgreSQL (once)
-Windows (PowerShell, using the `psql` that ships with the PostgreSQL installer):
-```powershell
-psql -U postgres -c "CREATE USER sentinel WITH PASSWORD 'choose-a-password';"
-psql -U postgres -c "CREATE DATABASE sentinelai OWNER sentinel;"
+```mermaid
+flowchart TD
+    A[Security Log Upload] --> B[React + Vite Dashboard]
+    B --> C[FastAPI Backend]
+    C --> D[Log Processing]
+    D --> E[Rule-Based Detection]
+    D --> F[Isolation Forest]
+    E --> G[Alert Correlation and Prioritization]
+    F --> G
+    G --> H[MITRE ATT&CK Mapping]
+    G --> I[Optional AI Analysis]
+    G --> J[(PostgreSQL)]
+    H --> J
+    I --> J
+    J --> K[Dashboard and Incident Reports]
 ```
-Linux/macOS:
+
+## 🚀 Getting Started
+
+Follow these steps to set up SentinelAI on your local machine.
+
+### Prerequisites
+
+Install the following:
+
+- Python 3.11 or a compatible version supported by the project dependencies
+- Node.js and npm
+- PostgreSQL
+- Git (optional, for cloning the repository)
+
+### 1. Clone the Repository
+
 ```bash
-sudo -u postgres psql -c "CREATE USER sentinel WITH PASSWORD 'choose-a-password';"
-sudo -u postgres psql -c "CREATE DATABASE sentinelai OWNER sentinel;"
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd SentinelAI
 ```
 
-### 2. Backend
-Windows PowerShell:
+Replace the repository URL with your actual GitHub repository URL.
+
+### 2. Configure PostgreSQL
+
+Create a PostgreSQL database and a dedicated user.
+
+Example SQL:
+
+```sql
+CREATE USER sentinel WITH PASSWORD 'CHANGE_ME';
+CREATE DATABASE sentinelai OWNER sentinel;
+```
+
+If you already created the `sentinel` user and `sentinelai` database, do not create them again.
+
+### 3. Configure the Backend
+
+Open a terminal in the backend directory:
+
 ```powershell
 cd backend
+```
+
+Create and activate a virtual environment if you do not already have one:
+
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env      # then edit DATABASE_URL (use your password)
-python -m scripts.init_db        # create tables
-python -m scripts.seed_demo      # optional: load sample data, run detection, create a demo incident
-uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
-Linux/macOS: `python3 -m venv .venv && source .venv/bin/activate`, `cp .env.example .env`, then the same `pip`/`python -m`/`uvicorn` commands. API docs: http://127.0.0.1:8000/docs
 
-### 3. Frontend (second terminal)
+Install the project dependencies:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Create or update `backend/.env` using the project's existing environment configuration.
+
+Example:
+
+```env
+DATABASE_URL=postgresql://sentinel:CHANGE_ME@localhost:5433/sentinelai
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+MAX_UPLOAD_MB=10
+MAX_UPLOAD_ROWS=50000
+LOG_LEVEL=INFO
+AI_PROVIDER=fallback
+```
+
+**Configuration notes:**
+
+- Replace `CHANGE_ME` with your actual PostgreSQL password.
+- Use the PostgreSQL port configured on your machine. The example uses `5433`.
+- Keep `.env` private and never commit passwords or API keys.
+- The fallback AI provider is intended to support operation without an external AI API. Optional AI integrations may require additional configuration.
+
+### 4. Initialize the Database
+
+Run these commands from the `backend` directory:
+
+```powershell
+python -m scripts.init_db
+python -m scripts.seed_demo
+```
+
+The initialization script prepares the database tables. The demo seeding script loads sample data if supported by the current project configuration.
+
+### 5. Start the Backend
+
+From the `backend` directory, run:
+
+```powershell
+uvicorn app.main:app --reload
+```
+
+The backend should be available at:
+
+- API: `http://127.0.0.1:8000`
+- Interactive API documentation: `http://127.0.0.1:8000/docs`
+
+### 6. Start the Frontend
+
+Open a **second terminal** at the repository root:
+
 ```powershell
 cd frontend
 npm install
-Copy-Item .env.example .env      # Linux/macOS: cp .env.example .env
-npm run dev                      # http://127.0.0.1:5173
+npm run dev
 ```
 
-### Environment configuration
-See `backend/.env.example` (copy of root `.env.example`) and `frontend/.env.example`. Never commit `.env`.
+Open the local URL printed by Vite, commonly:
 
-### Resetting the demo database
-`python -m scripts.reset_demo_db --yes` drops and recreates all tables. It refuses non-local databases.
+`http://localhost:5173`
 
-## Using the app
-1. **Load data** — *Log ingestion* → load a sample dataset or upload CSV/JSON/JSONL (≤10 MB, ≤50,000 rows by default). Re-uploading the same events is detected as duplicates.
-2. **Run detection** — *Alerts* → **Run detection**. Tune thresholds/ML sensitivity in *Detection settings* and re-run (optionally clearing untouched New alerts).
-3. **Investigate** — filter/search alerts, open one to see why it fired, limitations, MITRE table and evidence events; set status (New / Investigating / Resolved / False Positive).
-4. **Incident** — select alerts → *Create incident*; review the timeline, affected assets, guidance and notes.
-5. **Report** — on the incident, choose a provider and *Analyse incident* / *Generate report*; download Markdown or JSON from *Reports*.
+Keep both terminals running while using the application.
 
-### Sample demonstration workflow (≈5 minutes)
-Load *Synthetic security logs* → Run detection → open the **Critical** correlated alert for `admin` → tick it together with the other `admin` alerts in the list and choose *Create incident* (or open an alert and use *Add to existing incident*) → read the timeline → Analyse (fallback) → add a note → Generate report → download Markdown. Compare with `reports/sample-incident-report.md`. Which sample records trigger which rules: [backend/sample_data/README.md](backend/sample_data/README.md).
+## 📁 Project Structure
 
-## Running tests
+```text
+SentinelAI/
+├── backend/
+│   ├── app/
+│   │   ├── db/
+│   │   ├── ...
+│   ├── scripts/
+│   │   ├── init_db.py
+│   │   └── seed_demo.py
+│   ├── sample_data/
+│   ├── tests/
+│   ├── .env
+│   └── requirements.txt
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.js
+├── docs/
+├── reports/
+├── SECURITY.md
+└── README.md
+```
+
+The tree above is a simplified overview. Refer to the actual repository for the complete module structure.
+
+## 🔄 How It Works
+
+1. **Ingest:** The user uploads supported security logs or works with sample data.
+2. **Process:** The backend validates and processes incoming events.
+3. **Detect:** Rule-based logic and the Isolation Forest model identify potentially suspicious behavior.
+4. **Prioritize:** Detected events are organized for further investigation.
+5. **Enrich:** Supported detections can be associated with MITRE ATT&CK techniques.
+6. **Analyze:** Optional AI analysis can assist with interpreting findings.
+7. **Report:** Relevant results are stored and presented for security investigation and reporting.
+
+## 🔒 Security and Privacy
+
+- Designed for local development and testing.
+- Keep database credentials and API keys in environment variables.
+- Use authorized security logs and datasets only.
+- Review generated findings before treating them as confirmed incidents.
+- Detection results are indicators for investigation, not guarantees that an event is malicious.
+- Production deployment requires additional security hardening and testing.
+
+## 🧪 Testing
+
+Run backend tests from the `backend` directory:
+
 ```powershell
-cd backend ; pip install -r requirements-dev.txt ; pytest          # unit + API tests (API tests use in-memory SQLite)
-cd ../frontend ; npm test ; npm run build
+python -m pytest
 ```
-Backend API tests use SQLite purely as a documented test strategy; the application targets PostgreSQL.
 
-## Verification status
-Actually executed while generating this project (sandbox without network access):
-- Backend core (parser, rules, correlation, Isolation Forest, MITRE data, AI fallback + Ollama provider logic with a fake transport, report generation, sample-data expectations): **71 tests passed**, run with a minimal stand-in for pytest because pytest could not be installed. They are written for pytest.
-- `py_compile` of every backend module; `esbuild` parse + import-resolution of the whole frontend, including tests; a script confirming all 28 frontend API calls map to implemented backend routes.
+Use the project's supported test suite and sample data to validate detection behavior.
 
-**NOT executed (could not install the packages offline):** FastAPI/SQLAlchemy layer, `backend/tests/test_api.py`, PostgreSQL integration, `npm install/build/test`, Vitest tests, Ollama integration against a real model. Expect to fix small integration issues on first run; please report/fix them. No `package-lock.json` could be generated offline; run `npm install` to create one. Python versions are pinned in `requirements.txt` but not hash-locked.
+## 🛣️ Future Enhancements
 
-## Security limitations
-Local demo mode has **no authentication** — bind to 127.0.0.1 and use synthetic/authorised data. No role-based access, audit log, or TLS. Detections are leads, not proof; ML scores are relative; MITRE links are hypotheses. See [SECURITY.md](SECURITY.md) and [docs/threat-model.md](docs/threat-model.md).
+- Real-time log ingestion and streaming detection
+- Advanced alert correlation and deduplication
+- Expanded MITRE ATT&CK coverage
+- Role-based access control and audit trails
+- Model evaluation and detection-performance metrics
+- Docker-based deployment and CI/CD integration
 
-## Known limitations / not implemented
-Authentication, Alembic migrations, PDF export, removing alerts from an incident, live log streaming, long-term behavioral baselines, labelled-data evaluation of the ML model, Windows-specific event parsing beyond codes 4624/4625.
+## 🎯 Project Objective
 
-## Future enhancements
-Authentication + RBAC, Alembic, Sigma rule import, labelled benchmark datasets with honest metrics, threat-intel enrichment, PDF reports, background job queue for large analyses.
+The objective of SentinelAI is to explore how machine learning, rule-based security analytics, and optional LLM-assisted investigation can improve security monitoring workflows and reduce manual effort in SOC operations.
 
-## Screenshots
-None are included (none were captured). To add genuine ones: run the demo workflow, capture the Dashboard, Alerts, an incident timeline and a report, save to `docs/screenshots/`, and link them here.
+## 👩‍💻 Author
 
-## Troubleshooting
-See [docs/troubleshooting.md](docs/troubleshooting.md). Other docs: [API notes](docs/api.md), [detection rules](docs/detection-rules.md), [threat model](docs/threat-model.md).
+**Simran Kaur**
 
-## License
-MIT — see [LICENSE](LICENSE).
+GitHub: [@simrankaur2006](https://github.com/simrankaur2006)
+
+## 📄 License
+
+See the repository's `LICENSE` file for applicable licensing terms.
