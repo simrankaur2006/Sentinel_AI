@@ -1,0 +1,78 @@
+{
+  "attack_matrix": "Enterprise",
+  "version_note": "Technique IDs and names follow MITRE ATT&CK Enterprise. ATT&CK is revised periodically (names and tactic assignments can change); verify against the current release before citing in formal reports.",
+  "references": [
+    "https://attack.mitre.org/",
+    "https://attack.mitre.org/techniques/T1110/",
+    "https://attack.mitre.org/techniques/T1078/",
+    "https://attack.mitre.org/techniques/T1046/",
+    "https://attack.mitre.org/techniques/T1048/",
+    "https://attack.mitre.org/techniques/T1071/",
+    "https://attack.mitre.org/techniques/T1003/008/"
+  ],
+  "relations": {
+    "behavior_consistent": "The observed log behavior matches the pattern described by the technique. This does not prove an adversary performed it; benign causes (misconfiguration, authorized scanning, user error) are possible.",
+    "potential_association": "The technique is one plausible explanation for the observed behavior, but the logs alone do not distinguish it from benign activity or other techniques. Treat as a hypothesis."
+  },
+  "mappings": {
+    "brute_force": {
+      "technique_id": "T1110", "name": "Brute Force",
+      "tactics": [{"id": "TA0006", "name": "Credential Access"}],
+      "url": "https://attack.mitre.org/techniques/T1110/",
+      "default_relation": "behavior_consistent",
+      "rationale": "Many failed authentication attempts against an account or service in a short period matches the repeated-guessing pattern the technique describes."
+    },
+    "password_guessing": {
+      "technique_id": "T1110.001", "name": "Brute Force: Password Guessing",
+      "tactics": [{"id": "TA0006", "name": "Credential Access"}],
+      "url": "https://attack.mitre.org/techniques/T1110/001/",
+      "default_relation": "potential_association",
+      "rationale": "Repeated failures concentrated on one or a few accounts are consistent with guessing passwords for those accounts."
+    },
+    "password_spraying": {
+      "technique_id": "T1110.003", "name": "Brute Force: Password Spraying",
+      "tactics": [{"id": "TA0006", "name": "Credential Access"}],
+      "url": "https://attack.mitre.org/techniques/T1110/003/",
+      "default_relation": "potential_association",
+      "rationale": "One source failing authentication once or a few times each across many different accounts is consistent with password spraying."
+    },
+    "valid_accounts": {
+      "technique_id": "T1078", "name": "Valid Accounts",
+      "tactics": [
+        {"id": "TA0001", "name": "Initial Access"}, {"id": "TA0003", "name": "Persistence"},
+        {"id": "TA0004", "name": "Privilege Escalation"}, {"id": "TA0005", "name": "Defense Evasion"}
+      ],
+      "url": "https://attack.mitre.org/techniques/T1078/",
+      "default_relation": "potential_association",
+      "rationale": "A successful login that follows repeated failures, or that is unusual for the account (new network origins, off-hours), could indicate use of valid but compromised credentials. It can equally be a legitimate user who mistyped a password or travelled."
+    },
+    "network_service_discovery": {
+      "technique_id": "T1046", "name": "Network Service Discovery",
+      "tactics": [{"id": "TA0007", "name": "Discovery"}],
+      "url": "https://attack.mitre.org/techniques/T1046/",
+      "default_relation": "behavior_consistent",
+      "rationale": "One source contacting many distinct ports in a short window matches how port scanners enumerate services. Authorized vulnerability scanners and some applications produce the same pattern."
+    },
+    "exfiltration_alt_protocol": {
+      "technique_id": "T1048", "name": "Exfiltration Over Alternative Protocol",
+      "tactics": [{"id": "TA0010", "name": "Exfiltration"}],
+      "url": "https://attack.mitre.org/techniques/T1048/",
+      "default_relation": "potential_association",
+      "rationale": "A large volume of data sent from an internal host to an external address is a prerequisite observation for data exfiltration, but backups, software updates and uploads produce the same signal. Content and intent are not visible in connection logs."
+    },
+    "application_layer_protocol": {
+      "technique_id": "T1071", "name": "Application Layer Protocol",
+      "tactics": [{"id": "TA0011", "name": "Command and Control"}],
+      "url": "https://attack.mitre.org/techniques/T1071/",
+      "default_relation": "potential_association",
+      "rationale": "Internal hosts communicating with an address on a configured watchlist is a possible command-and-control indicator. The watchlist entry itself is only as reliable as its source."
+    },
+    "os_credential_dumping_passwd_shadow": {
+      "technique_id": "T1003.008", "name": "OS Credential Dumping: /etc/passwd and /etc/shadow",
+      "tactics": [{"id": "TA0006", "name": "Credential Access"}],
+      "url": "https://attack.mitre.org/techniques/T1003/008/",
+      "default_relation": "potential_association",
+      "rationale": "Attempts to read /etc/shadow or /etc/passwd are consistent with credential-file access, but may also be misconfigured jobs or administrators. Only attempts are visible, not successful reads."
+    }
+  }
+}
