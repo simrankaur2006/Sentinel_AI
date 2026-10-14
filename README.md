@@ -1,4 +1,4 @@
-# 🛡️ SentinelAI — AI-Powered SOC Copilot
+# 🛡️ SentinelAI: An AI-Powered SOC Copilot
 
 **Intelligent Security Monitoring • Anomaly Detection • Incident Analysis**
 
